@@ -49,19 +49,19 @@ info:
     ```
     
     Here is a PHP example of a generic function that can make requests to the API.
-
-      Function to make cURL request using CxAlloy authentication
-      
-      @param $url - The URL route to use.
-      @param string $timestamp - timestamp to use to generate signature.
-      @param string $secret -  API secret.
-      @param string $identifier -  API key identifier.
-      @param string $type - GET, POST, PUT, DELETE. Defaults to GET.
-      @param array $arguments - Endpoint arguments. (optional)
-      @return mixed
       
       ```php
       <?php
+      /**
+    	 *  Function to make cURL request using CxAlloy authentication
+    	 *
+    	 * @param $url - The URL route to use.
+    	 * @param string $timestamp - timestamp to use to generate signature.
+    	 * @param string $type - GET, POST, PUT, DELETE. Defaults to GET.
+    	 * @param array $arguments - Endpoint arguments. (optional)
+    	 *
+    	 * @return mixed
+    	 */
       function send_request(
           $url = null,
       		$timestamp,
