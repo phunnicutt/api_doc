@@ -2,40 +2,23 @@
 openapi: 3.0.0
 info:
   title: CxAlloy TQ API
-  description: |
-    This documentation describes CxAlloy's API standards, data model, and endpoints. We strive for documentation that is understandable, detailed, and comprehensive.
-
-    This is a sample server Petstore server.
-    You can find out more about Swagger at
-    [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).
-    For this sample, you can use the api key `special-key` to test the authorization filters.
-
-    # Introduction
-    This API is documented in **OpenAPI format** and is based on
-    [Petstore sample](http://petstore.swagger.io/) provided by [swagger.io](http://swagger.io) team.
-    It was **extended** to illustrate features of [generator-openapi-repo](https://github.com/Rebilly/generator-openapi-repo)
-    tool and [ReDoc](https://github.com/Rebilly/ReDoc) documentation. In addition to standard
-    OpenAPI syntax we use a few [vendor extensions](https://github.com/Rebilly/ReDoc/blob/master/docs/redoc-vendor-extensions.md).
-
-    # OpenAPI Specification
-    This API is documented in **OpenAPI format** and is based on
-    [Petstore sample](http://petstore.swagger.io/) provided by [swagger.io](http://swagger.io) team.
-    It was **extended** to illustrate features of [generator-openapi-repo](https://github.com/Rebilly/generator-openapi-repo)
-    tool and [ReDoc](https://github.com/Rebilly/ReDoc) documentation. In addition to standard
-    OpenAPI syntax we use a few [vendor extensions](https://github.com/Rebilly/ReDoc/blob/master/docs/redoc-vendor-extensions.md).
-
-    # Cross-Origin Resource Sharing
-    This API features Cross-Origin Resource Sharing (CORS) implemented in compliance with  [W3C spec](https://www.w3.org/TR/cors/).
-    And that allows cross-domain communication from the browser.
-    All responses have a wildcard same-origin which makes them completely public and accessible to everyone, including any code on any site.
-
-    # Authentication
-
-    Petstore offers two forms of authentication:
-      - API Key
-      - OAuth2
-    OAuth2 - an open protocol to allow secure authorization in a simple
-    and standard method from web, mobile and desktop applications.
+  description: "The CxAlloy TQ API is hosted at [https://tq.cxalloy.com/api/v1](https://tq.cxalloy.com/api/v1)\
+    \ \n\nThis documentation describes CxAlloy's API standards, data model, and endpoints.\
+    \ We strive for documentation that is understandable, detailed, and comprehensive.\n\
+    \n# Introduction\nWelcome to the CxAlloy TQ API.  Our team is happy to answer\
+    \ any questions, address any frustrations, or consider any requests. You can communicate\
+    \ with us by emailing [support](mailto:support@cxalloy.com).  We'll do our best\
+    \ to accommodate you.\n\n# Authentication\nThis API uses an account level key\
+    \ that can be created by an account admin in the account settings in TQ.  Once\
+    \ the key is created it will display a one time dialogue box with your secret\
+    \ (private) key.  You must save this key somewhere safe as it will be used to\
+    \ generate a signature that you can use to make requests to the API.  \n\n# Pagination\n\
+    The maximum number of records that any request can return is 500.  In order to\
+    \ get the next set of records you should pass `?page=2` in the query parameters\
+    \ if its a **GET** request or `page = 2` as a parameter in the request body of\
+    \ a **POST** request. \n\n\n# Rate Limiting\nMaximum requests per hour for any\
+    \ api key is 1000.  If you hit this limit you will get an error back letting you\
+    \ know that you have exceeded the limit.  \n"
   contact:
     email: support@cxalloy.com
   version: 1.0.0
