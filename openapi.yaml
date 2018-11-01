@@ -44,93 +44,10 @@ info:
     
     ```php
     <?php
-    //generate the signature
-		$signature = hash_hmac('sha256', $string, 'TQ API SECRET');
-		```
-		Here is a PHP example of a generic function that can be used to make requests to the API.
-		
-	  ```php
-	  <?php
-  		/**
-  	 *  Function to make cURL request using CxAlloy authentication
-  	 *
-  	 * @param $url - The URL route to use.
-  	 * @param string $timestamp - timestamp to use to generate signature.
-  	 * @param string $secret -  API secret.
-  	 * @param string $identifier -  API key identifier.
-  	 * @param string $type - GET, POST, PUT, DELETE. Defaults to GET.
-  	 * @param array $arguments - Endpoint arguments. (optional)
-  	 *
-  	 * @return mixed
-  	 */
-  	private function _send_request(
-  		$url = null,
-  		$timestamp,
-  		$identifier,
-  		$secret,
-  		$type = 'GET',
-  		$arguments = array()
-  	)
-  	{
-  		if (empty($timestamp))
-  		{
-  			return false;
-  		}
-  
-  		$type = strtoupper($type);
-  
-  		if ($type == 'GET')
-  		{
-  			$url .= "?" . http_build_query($arguments);
-  		}
-  
-  		// concat json encoded arguments with the timestamp from cxalloy-timestamp header
-  		if( ! empty($arguments))
-  		{
-  			$string = json_encode($arguments) . $timestamp;
-  		}
-  		else
-  		{
-  			$string = $timestamp;
-  		}
-  
-  		//generate the signature
-  		$signature = hash_hmac('sha256', $string, $secret);
-  
-  		$curl = curl_init();
-  
-  		curl_setopt_array($curl, array(
-  			CURLOPT_URL => $url,
-  			CURLOPT_RETURNTRANSFER => true,
-  			CURLOPT_ENCODING => "",
-  			CURLOPT_MAXREDIRS => 10,
-  			CURLOPT_TIMEOUT => 30,
-  			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-  			CURLOPT_CUSTOMREQUEST => $type,
-  			CURLOPT_HTTPHEADER => array(
-  				"cache-control: no-cache",
-  				"content-type: application/json",
-  				"cxalloy-identifier: $identifier",
-  				"cxalloy-signature: $signature",
-  				"cxalloy-timestamp: $timestamp"
-  			),
-  		));
-  
-  		// add the request body if needed
-  		if ( ! empty($arguments) && $type !== 'GET')
-  		{
-  			curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arguments));
-  		}
-  
-  		$result = curl_exec($curl);
-  
-  		curl_close($curl);
-  
-  		$response = json_decode($result);
-  
-  		return $response;
-  	}
+    $signature = hash_hmac('sha256', $string, 'TQ API SECRET');
     ```
+
+    
     
     
 
