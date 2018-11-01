@@ -203,7 +203,8 @@ paths:
     get:
       tags:
         - Project Settings
-      summary: Returns all attributes for an asset type
+      summary: /attribute/{asset_type}
+      description: Returns all attributes for an asset type
       parameters:
         - in: path
           name: asset_type
@@ -239,7 +240,8 @@ paths:
     get:
       tags:
         - Project Settings
-      summary: Returns a single attribute
+      summary: /attribute/{asset_type}/{asset_id}
+      description: Returns attributes for a single asset type
       parameters:
         - in: path
           name: asset_type
@@ -281,7 +283,8 @@ paths:
     get:
       tags:
         - Project Settings
-      summary: Returns all the disciplines in a project
+      summary: /discipline
+      description: Returns all the disciplines in a project
       parameters:
         - $ref: '#/components/parameters/ProjectParam'
       responses:
@@ -302,7 +305,8 @@ paths:
     get:
       tags:
         - Project Settings
-      summary: Returns a specific discipline
+      summary: /discipline/{discipline_id}
+      description: Returns a specific discipline
       parameters:
         - in: path
           name: discipline_id
@@ -329,7 +333,8 @@ paths:
     get:
       tags:
         - Project Settings
-      summary: Returns all the test attempt statuses in a project
+      summary: /testattemptstatus
+      description: Returns all the test attempt statuses in a project
       parameters:
         - $ref: '#/components/parameters/ProjectParam'
       responses:
@@ -350,7 +355,8 @@ paths:
     get:
       tags:
         - Project Settings
-      summary: Returns a specific test attempt statuses
+      summary: /testattemptstatus/{testattemptstatus_id}
+      description: Returns a specific test attempt statuses
       parameters:
         - in: path
           name: testattemptstatus_id
@@ -376,7 +382,8 @@ paths:
     get:
       tags:
         - Assets
-      summary: Returns all buildings on a project
+      summary: /building
+      description: Returns all buildings on a project
       parameters:
         - $ref: '#/components/parameters/ProjectParam'
         - $ref: '#/components/parameters/PageParam'
@@ -396,7 +403,8 @@ paths:
     get:
       tags:
         - Assets
-      summary: Returns a single building
+      summary: /building/{building_id}
+      description: Returns a single building
       parameters:
         - in: path
           name: building_id
@@ -421,7 +429,8 @@ paths:
     get:
       tags:
         - Assets
-      summary: Returns all equipment on a project
+      summary: /equipment
+      description: Returns all equipment on a project
       parameters:
         - $ref: '#/components/parameters/ProjectParam'
         - $ref: '#/components/parameters/PageParam'
@@ -453,7 +462,8 @@ paths:
     get:
       tags:
         - Assets
-      summary: Returns a single piece of equipment
+      summary: /equipment/{equipment_id}
+      description: Returns a single piece of equipment
       parameters:
         - in: path
           name: equipment_id
@@ -490,7 +500,8 @@ paths:
     get:
       tags:
         - Assets
-      summary: Returns all equipment types on a project
+      summary: /equipmenttype
+      description: Returns all equipment types on a project
       parameters:
         - $ref: '#/components/parameters/ProjectParam'
         - $ref: '#/components/parameters/PageParam'
@@ -510,7 +521,8 @@ paths:
     get:
       tags:
         - Assets
-      summary: Returns a single equipment type
+      summary: /equipmenttype/{type_id}
+      description: Returns a single equipment type
       parameters:
         - in: path
           name: type_id
@@ -535,7 +547,8 @@ paths:
     get:
       tags:
         - Assets
-      summary: Returns all floors on a project
+      summary: /floor
+      description: Returns all floors on a project
       parameters:
         - $ref: '#/components/parameters/ProjectParam'
         - $ref: '#/components/parameters/PageParam'
@@ -555,7 +568,8 @@ paths:
     get:
       tags:
         - Assets
-      summary: Returns a single floor
+      summary: /floor/{floor_id}
+      description: Returns a single floor
       parameters:
         - in: path
           name: floor_id
@@ -580,7 +594,8 @@ paths:
     get:
       tags:
         - Assets
-      summary: Returns all spaces on a project
+      summary: /space
+      description: Returns all spaces on a project
       parameters:
         - $ref: '#/components/parameters/ProjectParam'
         - $ref: '#/components/parameters/PageParam'
@@ -610,7 +625,8 @@ paths:
     get:
       tags:
         - Assets
-      summary: Returns a single space
+      summary: /space/{space_id}
+      description: Returns a single space
       parameters:
         - in: path
           name: space_id
@@ -645,7 +661,8 @@ paths:
     get:
       tags:
         - Assets
-      summary: Returns all systems on a project
+      summary: /system
+      description: Returns all systems on a project
       parameters:
         - $ref: '#/components/parameters/ProjectParam'
         - $ref: '#/components/parameters/PageParam'
@@ -665,7 +682,8 @@ paths:
     get:
       tags:
         - Assets
-      summary: Returns a single system
+      summary: /system/{system_id}
+      description: Returns a single system
       parameters:
         - in: path
           name: system_id
@@ -690,7 +708,8 @@ paths:
     post:
       tags:
         - Tests
-      summary: Returns test records
+      summary: /test
+      description: Returns test records
       requestBody:
         $ref: '#/components/requestBodies/testRequest'
       responses:
@@ -709,7 +728,8 @@ paths:
     get:
       tags:
         - Tests
-      summary: Returns all the test attempts in a test
+      summary: /testattempt
+      description: Returns all the test attempts in a test
       parameters:
         - $ref: '#/components/parameters/ProjectParam'
         - in: query
@@ -746,7 +766,8 @@ paths:
     get:
       tags:
         - Tests
-      summary: Returns a specific test attempt
+      summary: /testattempt/{testattempt_id}
+      description: Returns a specific test attempt
       parameters:
         - in: path
           name: testattempt_id
@@ -781,7 +802,8 @@ paths:
       get:
         tags:
           - Tests
-        summary: Returns all the test attempt lines in a test attempt
+        summary: /testattemptline
+        description: Returns all the test attempt lines in a test attempt
         parameters:
           - $ref: '#/components/parameters/ProjectParam'
           - in: query
@@ -819,7 +841,8 @@ paths:
     get:
       tags:
         - Tests
-      summary: Returns a specific test attempt line
+      summary: /testattemptline/{testattemptline_id}
+      description: Returns a specific test attempt line
       parameters:
         - in: path
           name: testattemptline_id
@@ -856,7 +879,8 @@ paths:
     get:
       tags:
         - Files
-      summary: Returns all files on a project
+      summary: /file
+      description: Returns all files on a project
       parameters:
         - $ref: '#/components/parameters/ProjectParam'
         - $ref: '#/components/parameters/PageParam'
@@ -876,7 +900,8 @@ paths:
     get:
       tags:
         - Files
-      summary: Returns a single file
+      summary: /file/{file_id}
+      description: Returns a single file
       parameters:
         - in: path
           name: file_id
