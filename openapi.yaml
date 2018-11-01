@@ -53,81 +53,81 @@ info:
       ```php
       <?php
       /**
-    	 *  Function to make cURL request using CxAlloy authentication
-    	 *
-    	 * @param $url - The URL route to use.
-    	 * @param string $timestamp - timestamp to use to generate signature.
-    	 * @param string $type - GET, POST, PUT, DELETE. Defaults to GET.
-    	 * @param array $arguments - Endpoint arguments. (optional)
-    	 *
-    	 * @return mixed
-    	 */
+       *  Function to make cURL request using CxAlloy authentication
+       *
+       * @param $url - The URL route to use.
+       * @param string $timestamp - timestamp to use to generate signature.
+       * @param string $type - GET, POST, PUT, DELETE. Defaults to GET.
+       * @param array $arguments - Endpoint arguments. (optional)
+       *
+       * @return mixed
+       */
       function send_request(
           $url = null,
-      		$timestamp,
-      		$identifier,
-      		$secret,
-      		$type = 'GET',
-      		$arguments = array()
+          $timestamp,
+          $identifier,
+          $secret,
+          $type = 'GET',
+          $arguments = array()
         )
       {
         if (empty($timestamp))
-      		{
-      			return false;
-      		}
-      		
-      	$type = strtoupper($type);
+          {
+            return false;
+          }
+          
+        $type = strtoupper($type);
 
-    		if ($type == 'GET')
-    		{
-    			$url .= "?" . http_build_query($arguments);
-    		}
+        if ($type == 'GET')
+        {
+          $url .= "?" . http_build_query($arguments);
+        }
   
-    		// concat json encoded arguments with the timestamp from cxalloy-timestamp header
-    		if( ! empty($arguments))
-    		{
-    			$string = json_encode($arguments) . $timestamp;
-    		}
-    		else
-    		{
-    			$string = $timestamp;
-    		}
+        // concat json encoded arguments with the timestamp from cxalloy-timestamp header
+        if( ! empty($arguments))
+        {
+          $string = json_encode($arguments) . $timestamp;
+        }
+        else
+        {
+          $string = $timestamp;
+        }
   
-    		//generate the signature
-    		$signature = hash_hmac('sha256', $string, $secret);
-    		
-    		$curl = curl_init();
+        //generate the signature
+        $signature = hash_hmac('sha256', $string, $secret);
+        
+        $curl = curl_init();
 
-    		curl_setopt_array($curl, array(
-    			CURLOPT_URL => $url,
-    			CURLOPT_RETURNTRANSFER => true,
-    			CURLOPT_ENCODING => "",
-    			CURLOPT_MAXREDIRS => 10,
-    			CURLOPT_TIMEOUT => 30,
-    			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    			CURLOPT_CUSTOMREQUEST => $type,
-    			CURLOPT_HTTPHEADER => array(
-    				"cache-control: no-cache",
-    				"content-type: application/json",
-    				"cxalloy-identifier: $identifier",
-    				"cxalloy-signature: $signature",
-    				"cxalloy-timestamp: $timestamp"
-    			),
-    		));
+        curl_setopt_array($curl, array(
+          CURLOPT_URL => $url,
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => "",
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 30,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => $type,
+          CURLOPT_HTTPHEADER => array(
+            "cache-control: no-cache",
+            "content-type: application/json",
+            "cxalloy-identifier: $identifier",
+            "cxalloy-signature: $signature",
+            "cxalloy-timestamp: $timestamp"
+          ),
+        ));
   
-    		// add the request body if needed
-    		if ( ! empty($arguments) && $type !== 'GET')
-    		{
-    			curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arguments));
-    		}
+        // add the request body if needed
+        if ( ! empty($arguments) && $type !== 'GET')
+        {
+          curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($arguments));
+        }
   
-    		$result = curl_exec($curl);
+        $result = curl_exec($curl);
   
-    		curl_close($curl);
+        curl_close($curl);
   
-    		$response = json_decode($result);
+        $response = json_decode($result);
   
-    		return $response;
+        return $response;
         
       }
       ```
@@ -162,7 +162,8 @@ paths:
     get:
       tags:
         - Projects
-      summary: Returns all the projects for an account
+      summary: /project
+      description: Returns all the projects for an account
       responses:
         '200':
           description: successful operation
@@ -177,7 +178,8 @@ paths:
     get:
       tags:
         - Projects
-      summary: Returns a specific project
+      summary: /project/{project_id}
+      description: Returns a specific project
       parameters:
         - in: path
           name: project_id
