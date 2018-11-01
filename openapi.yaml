@@ -1,51 +1,70 @@
----
 openapi: 3.0.0
+servers:
+  - url: https://tq.cxalloy.com/api/v1
 info:
+  description: |
+    The CxAlloy TQ API is hosted at [https://tq.cxalloy.com/api/v1](https://tq.cxalloy.com/api/v1) 
+    
+    This documentation describes CxAlloy's API standards, data model, and endpoints. We strive for documentation that is understandable, detailed, and comprehensive.
+
+    # Introduction
+    Welcome to the CxAlloy TQ API.  Our team is happy to answer any questions, address any frustrations, or consider any requests. You can communicate with us by emailing [support](mailto:support@cxalloy.com).  We'll do our best to accommodate you.
+    
+    # Security
+    CxAlloy values the security of your data, and all API requests must be made over HTTPS.  
+    This is a **REST** API that uses predictable, resource-oriented URLs and standard HTTP response codes.
+    
+    We strongly recommend you keep your API key secret as secure as possible:
+    *  You should never transmit it over a network or the internet
+    *  Don't store it in publicly accessible code or website (e.g. Javascript for a public website).
+    *  Avoid checking it into source control. Use configuration files that can be loaded into your code.
+    
+    # Authentication
+    This API uses an account level key that can be created by an account admin in the account settings in TQ.  Once the key is created it will display a one time dialogue box with your secret (private) key.  You must save this key somewhere safe as it will be used to generate a signature that you can use to make requests to the API.  
+    
+    Every request to the API must pass 4 headers with each request. 
+    ## HTTP Headers
+    |        Name          |                      Value                           |
+    |:---------------------|:-----------------------------------------------------|
+    | Content-Type         | application/json                                     |
+    | cxalloy-identifier   | The identifier from the API key                      |
+    | cxalloy-signature    | Signature generated from the secret for this request |
+    | cxalloy-timestamp    | unix timestamp used when generating the signature    |
+
+    
+    # Pagination
+    The maximum number of records that any request can return is 500.  In order to get the next set of records you should pass `?page=2` in the query parameters if its a **GET** request or `page = 2` as a parameter in the request body of a **POST** request. 
+    
+
+    # Rate Limiting
+    Maximum requests per hour for any api key is 1000.  If you hit this limit you will get an error back letting you know that you have exceeded the limit.  
+
+    
+    
+  version: "1.0.0"
   title: CxAlloy TQ API
-  description: "The CxAlloy TQ API is hosted at [https://tq.cxalloy.com/api/v1](https://tq.cxalloy.com/api/v1)\
-    \ \n\nThis documentation describes CxAlloy's API standards, data model, and endpoints.\
-    \ We strive for documentation that is understandable, detailed, and comprehensive.\n\
-    \n# Introduction\nWelcome to the CxAlloy TQ API.  Our team is happy to answer\
-    \ any questions, address any frustrations, or consider any requests. You can communicate\
-    \ with us by emailing [support](mailto:support@cxalloy.com).  We'll do our best\
-    \ to accommodate you.\n\n# Authentication\nThis API uses an account level key\
-    \ that can be created by an account admin in the account settings in TQ.  Once\
-    \ the key is created it will display a one time dialogue box with your secret\
-    \ (private) key.  You must save this key somewhere safe as it will be used to\
-    \ generate a signature that you can use to make requests to the API.  \n\n# Pagination\n\
-    The maximum number of records that any request can return is 500.  In order to\
-    \ get the next set of records you should pass `?page=2` in the query parameters\
-    \ if its a **GET** request or `page = 2` as a parameter in the request body of\
-    \ a **POST** request. \n\n\n# Rate Limiting\nMaximum requests per hour for any\
-    \ api key is 1000.  If you hit this limit you will get an error back letting you\
-    \ know that you have exceeded the limit.  \n"
   contact:
     email: support@cxalloy.com
-  version: 1.0.0
-externalDocs:
-  description: General CxAlloy Documentation
-  url: https://support.cxalloy.com
-servers:
-- url: https://tq.cxalloy.com/api/v1
 tags:
-- name: Projects
-  description: Operations dealing with projects
-- name: Project Settings
-  description: Operations dealing with project settings
-- name: Assets
-  description: Operations dealing with assets
-- name: Tests
-  description: Operations dealing with tests
-- name: Files
-  description: Operations dealing with files
+  - name: Projects
+    description: Operations dealing with projects
+  - name: Project Settings
+    description: Operations dealing with project settings
+  - name: Assets
+    description: Operations dealing with assets
+  - name: Tests
+    description: Operations dealing with tests
+  - name: Files
+    description: Operations dealing with files
 paths:
+
   /project:
     get:
       tags:
-      - Projects
+        - Projects
       summary: Returns all the projects for an account
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -53,23 +72,21 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Project'
+          
   /project/{project_id}:
     get:
       tags:
-      - Projects
+        - Projects
       summary: Returns a specific project
       parameters:
-      - name: project_id
-        in: path
-        description: Specific Project ID
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: integer
-          format: int32
+        - in: path
+          name: project_id
+          description: Specific Project ID
+          schema:
+            type: integer
+          required: true
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -77,136 +94,96 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Project'
-        400:
+        '400':
           description: Project does not exist in your account
+          
   /attribute/{asset_type}:
     get:
       tags:
-      - Project Settings
+        - Project Settings
       summary: Returns all attributes for an asset type
       parameters:
-      - name: asset_type
-        in: path
-        description: Asset type that attribute is connected to
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: string
-          enum:
-          - building
-          - equipment
-          - floor
-          - space
-          - system
-          - type
-          - zone
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: page
-        in: query
-        description: The page (offset) of records to return. Pages have a limit of 500 records.
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-          default: 1
+        - in: path
+          name: asset_type
+          description: Asset type that attribute is connected to
+          schema:
+            type: string
+            enum:
+              - building
+              - equipment
+              - floor
+              - space
+              - system
+              - type
+              - zone
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
+        - $ref: '#/components/parameters/PageParam'
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Attribute'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n- Asset type required\n- Invalid Asset Type\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+                - Asset type required
+                - Invalid Asset Type
+  
   /attribute/{asset_type}/{asset_id}:
     get:
       tags:
-      - Project Settings
+        - Project Settings
       summary: Returns a single attribute
       parameters:
-      - name: asset_type
-        in: path
-        description: Asset type that attribute is connected to
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: string
-          enum:
-          - building
-          - equipment
-          - floor
-          - space
-          - system
-          - type
-          - zone
-      - name: asset_id
-        in: path
-        description: Specific asset ID
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: integer
-          format: int32
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: page
-        in: query
-        description: The page (offset) of records to return. Pages have a limit of 500 records.
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-          default: 1
+        - in: path
+          name: asset_type
+          description: Asset type that attribute is connected to
+          schema:
+            type: string
+            enum:
+              - building
+              - equipment
+              - floor
+              - space
+              - system
+              - type
+              - zone
+          required: true
+        - in: path
+          name: asset_id
+          description: Specific asset ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
+        - $ref: '#/components/parameters/PageParam'
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Attribute'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account \n- Asset type required\n- Invalid Asset Type\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account 
+                - Asset type required
+                - Invalid Asset Type
+          
   /discipline:
     get:
       tags:
-      - Project Settings
+        - Project Settings
       summary: Returns all the disciplines in a project
       parameters:
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
+        - $ref: '#/components/parameters/ProjectParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -214,35 +191,26 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Discipline'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+          
   /discipline/{discipline_id}:
     get:
       tags:
-      - Project Settings
+        - Project Settings
       summary: Returns a specific discipline
       parameters:
-      - name: discipline_id
-        in: path
-        description: Specific discipline ID
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: integer
-          format: int32
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
+        - in: path
+          name: discipline_id
+          description: Specific discipline ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -250,26 +218,20 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Discipline'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+                
   /testattemptstatus:
     get:
       tags:
-      - Project Settings
+        - Project Settings
       summary: Returns all the test attempt statuses in a project
       parameters:
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
+        - $ref: '#/components/parameters/ProjectParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -277,35 +239,26 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Testattemptstatus'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+          
   /testattemptstatus/{testattemptstatus_id}:
     get:
       tags:
-      - Project Settings
+        - Project Settings
       summary: Returns a specific test attempt statuses
       parameters:
-      - name: testattemptstatus_id
-        in: path
-        description: Specific test attempt status ID
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: integer
-          format: int32
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
+        - in: path
+          name: testattemptstatus_id
+          description: Specific test attempt status ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
       responses:
-        200:
+        '200':
           description: successful operation
           content:
             application/json:
@@ -313,761 +266,580 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Testattemptstatus'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
   /building:
     get:
       tags:
-      - Assets
+        - Assets
       summary: Returns all buildings on a project
       parameters:
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: page
-        in: query
-        description: The page (offset) of records to return. Pages have a limit of 500 records.
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-          default: 1
+        - $ref: '#/components/parameters/ProjectParam'
+        - $ref: '#/components/parameters/PageParam'
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Building'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+  
   /building/{building_id}:
     get:
       tags:
-      - Assets
+        - Assets
       summary: Returns a single building
       parameters:
-      - name: building_id
-        in: path
-        description: Specific building ID
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: integer
-          format: int32
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
+        - in: path
+          name: building_id
+          description: Specific building ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Building'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+                
   /equipment:
     get:
       tags:
-      - Assets
+        - Assets
       summary: Returns all equipment on a project
       parameters:
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: page
-        in: query
-        description: The page (offset) of records to return. Pages have a limit of 500 records.
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-          default: 1
-      - name: include
-        in: query
-        description: "This will include related data in the results. (comma seperated\
-          \ string) \n\nPossible includes are \n  - systems\n  - zones\n  - attributes\n"
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/ProjectParam'
+        - $ref: '#/components/parameters/PageParam'
+        - in: query
+          name: include
+          schema:
+            type: string
+          required: false
+          description: |
+                This will include related data in the results. (comma seperated string) 
+
+                Possible includes are 
+                  - systems
+                  - zones
+                  - attributes
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Equipment'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+  
   /equipment/{equipment_id}:
     get:
       tags:
-      - Assets
+        - Assets
       summary: Returns a single piece of equipment
       parameters:
-      - name: equipment_id
-        in: path
-        description: Specific equipment ID
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: integer
-          format: int32
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: include
-        in: query
-        description: "This will include related data in the results. (comma seperated\
-          \ string) \n\nPossible includes are \n  - systems\n  - zones\n  - attributes\n"
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: string
+        - in: path
+          name: equipment_id
+          description: Specific equipment ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
+        - in: query
+          name: include
+          schema:
+            type: string
+          required: false
+          description: |
+                This will include related data in the results. (comma seperated string) 
+
+                Possible includes are 
+                  - systems
+                  - zones
+                  - attributes
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Equipment'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+                
   /equipmenttype:
     get:
       tags:
-      - Assets
+        - Assets
       summary: Returns all equipment types on a project
       parameters:
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: page
-        in: query
-        description: The page (offset) of records to return. Pages have a limit of 500 records.
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-          default: 1
+        - $ref: '#/components/parameters/ProjectParam'
+        - $ref: '#/components/parameters/PageParam'
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Equipmenttype'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+  
   /equipmenttype/{type_id}:
     get:
       tags:
-      - Assets
+        - Assets
       summary: Returns a single equipment type
       parameters:
-      - name: type_id
-        in: path
-        description: Specific equipment type ID
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: integer
-          format: int32
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
+        - in: path
+          name: type_id
+          description: Specific equipment type ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Equipmenttype'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+
   /floor:
     get:
       tags:
-      - Assets
+        - Assets
       summary: Returns all floors on a project
       parameters:
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: page
-        in: query
-        description: The page (offset) of records to return. Pages have a limit of 500 records.
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-          default: 1
+        - $ref: '#/components/parameters/ProjectParam'
+        - $ref: '#/components/parameters/PageParam'
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Floor'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+  
   /floor/{floor_id}:
     get:
       tags:
-      - Assets
+        - Assets
       summary: Returns a single floor
       parameters:
-      - name: floor_id
-        in: path
-        description: Specific floor ID
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: integer
-          format: int32
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
+        - in: path
+          name: floor_id
+          description: Specific floor ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Floor'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+  
   /space:
     get:
       tags:
-      - Assets
+        - Assets
       summary: Returns all spaces on a project
       parameters:
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: page
-        in: query
-        description: The page (offset) of records to return. Pages have a limit of 500 records.
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-          default: 1
-      - name: include
-        in: query
-        description: "This will include related data in the results. (comma seperated\
-          \ string) \n\nPossible includes are \n  - zones\n"
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/ProjectParam'
+        - $ref: '#/components/parameters/PageParam'
+        - in: query
+          name: include
+          schema:
+            type: string
+          required: false
+          description: |
+                This will include related data in the results. (comma seperated string) 
+
+                Possible includes are 
+                  - zones
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Space'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+  
   /space/{space_id}:
     get:
       tags:
-      - Assets
+        - Assets
       summary: Returns a single space
       parameters:
-      - name: space_id
-        in: path
-        description: Specific space ID
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: integer
-          format: int32
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: include
-        in: query
-        description: "This will include related data in the results. (comma seperated\
-          \ string) \n\nPossible includes are \n  - zones\n"
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: string
+        - in: path
+          name: space_id
+          description: Specific space ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
+        - in: query
+          name: include
+          schema:
+            type: string
+          required: false
+          description: |
+                This will include related data in the results. (comma seperated string) 
+
+                Possible includes are 
+                  - zones
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Space'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account              \n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account              
+  
   /system:
     get:
       tags:
-      - Assets
+        - Assets
       summary: Returns all systems on a project
       parameters:
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: page
-        in: query
-        description: The page (offset) of records to return. Pages have a limit of 500 records.
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-          default: 1
+        - $ref: '#/components/parameters/ProjectParam'
+        - $ref: '#/components/parameters/PageParam'
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/System'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+  
   /system/{system_id}:
     get:
       tags:
-      - Assets
+        - Assets
       summary: Returns a single system
       parameters:
-      - name: system_id
-        in: path
-        description: Specific system ID
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: integer
-          format: int32
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
+        - in: path
+          name: system_id
+          description: Specific system ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/System'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+
   /test:
     post:
       tags:
-      - Tests
+        - Tests
       summary: Returns test records
       requestBody:
         $ref: '#/components/requestBodies/testRequest'
       responses:
-        200:
+        '200':
           description: Success
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/filterResponse'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+  
   /testattempt:
     get:
       tags:
-      - Tests
+        - Tests
       summary: Returns all the test attempts in a test
       parameters:
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: test_id
-        in: query
-        description: The test id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: page
-        in: query
-        description: The page (offset) of records to return. Pages have a limit of 500 records.
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-          default: 1
-      - name: include
-        in: query
-        description: "This will include related data in the results. (comma seperated\
-          \ string) \n\nPossible includes are \n  - lines\n"
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/ProjectParam'
+        - in: query
+          name: test_id
+          schema:
+            type: integer
+          required: true
+          description: The test id 
+        - $ref: '#/components/parameters/PageParam'
+        - in: query
+          name: include
+          schema:
+            type: string
+          required: false
+          description: |
+                This will include related data in the results. (comma seperated string) 
+
+                Possible includes are 
+                  - lines
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Testattempt'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n- Test ID required\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+                - Test ID required
+  
   /testattempt/{testattempt_id}:
     get:
       tags:
-      - Tests
+        - Tests
       summary: Returns a specific test attempt
       parameters:
-      - name: testattempt_id
-        in: path
-        description: Specific test attempt ID
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: integer
-          format: int32
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: include
-        in: query
-        description: "This will include related data in the results. (comma seperated\
-          \ string) \n\nPossible includes are \n  - lines\n"
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: string
+        - in: path
+          name: testattempt_id
+          description: Specific test attempt ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
+        - in: query
+          name: include
+          schema:
+            type: string
+          required: false
+          description: |
+                This will include related data in the results. (comma seperated string) 
+
+                Possible includes are 
+                  - lines
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Testattempt'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account             \n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account             
+          
   /testattemptline:
-    get:
-      tags:
-      - Tests
-      summary: Returns all the test attempt lines in a test attempt
-      parameters:
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: testattempt_id
-        in: query
-        description: The test attempt id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: page
-        in: query
-        description: The page (offset) of records to return. Pages have a limit of 500 records.
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-          default: 1
-      - name: include
-        in: query
-        description: "This will include related data in the results. (comma seperated\
-          \ string) \n\nPossible includes are \n  - headers (*Lines designated as\
-          \ headers are not included by default*)\n  - issues\n"
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: string
-      responses:
-        200:
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Testattemptline'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n- Test attempt ID required\n"
+      get:
+        tags:
+          - Tests
+        summary: Returns all the test attempt lines in a test attempt
+        parameters:
+          - $ref: '#/components/parameters/ProjectParam'
+          - in: query
+            name: testattempt_id
+            schema:
+              type: integer
+            required: true
+            description: The test attempt id 
+          - $ref: '#/components/parameters/PageParam'
+          - in: query
+            name: include
+            schema:
+              type: string
+            required: false
+            description: |
+                  This will include related data in the results. (comma seperated string) 
+  
+                  Possible includes are 
+                    - headers (*Lines designated as headers are not included by default*)
+                    - issues
+        responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Testattemptline'
+          '400':
+            description: |
+                  - Project ID required  
+                  - Project does not exist in your account
+                  - Test attempt ID required
+  
   /testattemptline/{testattemptline_id}:
     get:
       tags:
-      - Tests
+        - Tests
       summary: Returns a specific test attempt line
       parameters:
-      - name: testattemptline_id
-        in: path
-        description: Specific test attempt ID
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: integer
-          format: int32
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: include
-        in: query
-        description: "This will include related data in the results. (comma seperated\
-          \ string) \n\nPossible includes are \n  - headers (*Lines designated as\
-          \ headers are not included by default*)\n  - issues\n"
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: string
+        - in: path
+          name: testattemptline_id
+          description: Specific test attempt ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
+        - in: query
+          name: include
+          schema:
+            type: string
+          required: false
+          description: |
+                This will include related data in the results. (comma seperated string) 
+
+                Possible includes are 
+                  - headers (*Lines designated as headers are not included by default*)
+                  - issues
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Testattemptline'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account             \n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account             
+          
+  
   /file:
     get:
       tags:
-      - Files
+        - Files
       summary: Returns all files on a project
       parameters:
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-      - name: page
-        in: query
-        description: The page (offset) of records to return. Pages have a limit of 500 records.
-        required: false
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
-          default: 1
+        - $ref: '#/components/parameters/ProjectParam'
+        - $ref: '#/components/parameters/PageParam'
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/File'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+  
   /file/{file_id}:
     get:
       tags:
-      - Files
+        - Files
       summary: Returns a single file
       parameters:
-      - name: file_id
-        in: path
-        description: Specific file ID
-        required: true
-        style: SIMPLE
-        explode: false
-        schema:
-          type: integer
-          format: int32
-      - name: project_id
-        in: query
-        description: The project id
-        required: true
-        style: FORM
-        explode: true
-        schema:
-          type: integer
-          format: int32
+        - in: path
+          name: file_id
+          description: Specific file ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
       responses:
-        200:
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/File'
-        400:
-          description: "- Project ID required  \n- Project does not exist in your\
-            \ account\n"
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+          
+externalDocs:
+  description: General CxAlloy Documentation
+  url: 'https://support.cxalloy.com'
 components:
+
+  parameters:
+  
+    ProjectParam:
+      in: query
+      name: project_id
+      schema:
+        type: integer
+      required: true
+      description: The project id
+      
+    PageParam:
+      in: query
+      name: page
+      schema:
+        type: integer
+        default: 1
+      required: false
+      description: The page (offset) of records to return. Pages have a limit of 500 records.
+      
+  
   schemas:
+
     Project:
       type: object
       properties:
         project_id:
           type: integer
-          format: int32
           example: 67
         account_id:
           type: integer
-          format: int32
           example: 7
         name:
           type: string
           example: Woodland Infrastructure Upgrade
         status:
           type: string
-          example: Active
           enum:
-          - Active
-          - Archived
+            - Active
+            - Archived
+          example: Active
         number:
           type: string
           example: 117-50
@@ -1089,29 +861,27 @@ components:
         phase:
           type: string
           enum:
-          - Design
-          - Construction
-          - Operations
+            - Design
+            - Construction
+            - Operations
         timezone:
           type: string
           example: America/New_York
+
     Equipment:
       type: object
       properties:
         equipment_id:
           type: integer
-          format: int32
           example: 7477
         project_id:
           type: integer
-          format: int32
           example: 67
         name:
           type: string
           example: AHU-1
         status_id:
           type: integer
-          format: int32
           example: 345
         status:
           type: string
@@ -1120,70 +890,61 @@ components:
           type: string
         type_id:
           type: integer
-          format: int32
           example: 67585
         type:
           type: string
           example: Air Handling Unit
         disipline_id:
           type: integer
-          format: int32
           example: 46
         disipline:
           type: string
           example: Mechanical
         space_id:
           type: integer
-          format: int32
           example: 56584
         space:
           type: string
           example: 1013-B
         floor_id:
           type: integer
-          format: int32
           example: 24
         floor:
           type: string
           example: First
         building_id:
           type: integer
-          format: int32
           example: 78
         building:
           type: string
           example: Main Building
         notes:
           type: string
-          example: Research lab
+          example: Research lab 
+
     Test:
       type: object
       properties:
         test_id:
           type: integer
-          format: int32
           example: 4242
         project_id:
           type: integer
-          format: int32
           example: 67
         number:
           type: integer
-          format: int32
           example: 6
         name:
           type: string
           example: AHU-1
         status_id:
           type: integer
-          format: int32
           example: 4
         status:
           type: string
           example: Passed
         attempt_count:
           type: integer
-          format: int32
           example: 3
         asset_name:
           type: string
@@ -1193,9 +954,9 @@ components:
           example: Equipment
         asset_key:
           type: string
-          description: |
-            *key is the asset type concatenated with the ID*
           example: equipment-1456
+          description: | 
+                        *key is the asset type concatenated with the ID*
         assigned_name:
           type: string
           example: Composite International
@@ -1204,12 +965,11 @@ components:
           example: Company
         assigned_key:
           type: string
-          description: |
-            *key is the assigned type concatenated with the ID*
           example: company-6541
+          description: | 
+                        *key is the assigned type concatenated with the ID*
         discipline_id:
           type: integer
-          format: int32
           example: 2
         discipline:
           type: string
@@ -1223,20 +983,18 @@ components:
         tools:
           type: string
           example: multimeter, torque wrench, sockets, hand tools.
+    
     Testattempt:
       type: object
       properties:
         testattempt_id:
           type: integer
-          format: int32
           example: 2346
         attempt_number:
           type: integer
-          format: int32
           example: 3
         status_id:
           type: integer
-          format: int32
           example: 5
         status:
           type: string
@@ -1246,17 +1004,16 @@ components:
           example: Tony Gutierrez
         status_change_date:
           type: string
-          example: 2013-04-12
+          example: "2013-04-12"
+          
     Testattemptline:
       type: object
       properties:
         testattemptline_id:
           type: integer
-          format: int32
           example: 339
         line_number:
           type: integer
-          format: int32
           example: 12
         description:
           type: string
@@ -1264,9 +1021,9 @@ components:
         answer:
           type: string
           enum:
-          - Yes
-          - No
-          - NA
+            - Yes
+            - No
+            - NA
         note:
           type: string
           example: Functional test could not be performed.
@@ -1275,34 +1032,32 @@ components:
           example: CHURN PRESSURE
         attribute_value:
           type: string
-          example: "23"
+          example: 23
         attribute_unit:
           type: string
           example: kPa
+          
     Discipline:
       type: object
       properties:
         discipline_id:
           type: integer
-          format: int32
           example: 424
         project_id:
           type: integer
-          format: int32
           example: 67
         name:
           type: string
           example: Mechanical
+          
     Building:
       type: object
       properties:
         building_id:
           type: integer
-          format: int32
           example: 83
         project_id:
           type: integer
-          format: int32
           example: 67
         name:
           type: string
@@ -1310,92 +1065,85 @@ components:
         description:
           type: string
           example: Retail and Office Areas
+          
     Floor:
       type: object
       properties:
         floor_id:
           type: integer
-          format: int32
           example: 568
         project_id:
           type: integer
-          format: int32
           example: 67
         name:
           type: string
           example: Third Floor
         description:
           type: string
-          example: Upper Level Retail
+          example: Upper Level Retail    
         building_id:
           type: integer
-          format: int32
           example: 83
         building:
           type: string
           example: Main Building
+          
     System:
       type: object
       properties:
         system_id:
           type: integer
-          format: int32
           example: 749
         project_id:
           type: integer
-          format: int32
           example: 67
         name:
           type: string
           example: HVAC
         description:
           type: string
-          example: Heating, Ventilation and Air Conditioning
+          example: Heating, Ventilation and Air Conditioning    
         building_id:
           type: integer
-          format: int32
           example: 83
         building:
           type: string
           example: Main Building
         discipline_id:
           type: integer
-          format: int32
           example: 424
         discipline:
           type: string
           example: Mechanical
+          
     Space:
       type: object
       properties:
         space_id:
           type: integer
-          format: int32
           example: 3789
         project_id:
           type: integer
-          format: int32
           example: 67
         name:
           type: string
           example: 03320 Retail Pump Room
         description:
           type: string
-          example: Houses retail condenser water pumps.
+          example: Houses retail condenser water pumps.    
         building_id:
           type: integer
-          format: int32
           example: 83
         building:
           type: string
           example: Main Building
         floor_id:
           type: integer
-          format: int32
           example: 738
         floor:
           type: string
           example: Third Floor
+    
     Attribute:
       type: object
       properties:
@@ -1404,13 +1152,13 @@ components:
           example: Air Flow Minimum
         value:
           type: string
-          example: "23"
+          example: 23  
         unit:
           type: string
-          example: L/s
+          example: L/s  
         verified:
           type: boolean
-          example: false
+          example: 1
         verified_comment:
           type: string
           example: Setpoint is shown on page 27 of the balance report.
@@ -1419,39 +1167,37 @@ components:
           example: ACB-F3620
         source_type:
           type: string
-          example: equipment
           enum:
-          - building
-          - equipment
-          - floor
-          - space
-          - system
-          - type
-          - zone
+              - building
+              - equipment
+              - floor
+              - space
+              - system
+              - type
+              - zone
+          example: equipment  
         source_id:
           type: integer
-          format: int32
           example: 64732
         project_id:
           type: integer
-          format: int32
           example: 67
+    
     File:
       type: object
       properties:
         file_id:
           type: integer
-          format: int32
           example: 749
         name:
           type: string
           example: AHU Drawing.jpg
         size:
           type: string
-          example: 48.49 K
+          example: 48.49 K  
         is_image:
           type: boolean
-          example: false
+          example: 1
         uploaded_by:
           type: string
           example: Patrick Hunnicutt
@@ -1466,39 +1212,37 @@ components:
           example: AHU-A3-02F
         source_type:
           type: string
-          example: equipment
           enum:
-          - project
-          - equipment
-          - issue
-          - test
-          - testattemptline
-          - checklist
-          - checklistsection
-          - checklistsectionline
-          - type
-          - system
-          - building
-          - floor
-          - zone
-          - space
-          - review
-          - fieldobservation
-          - meeting
+            - project
+            - equipment
+            - issue
+            - test
+            - testattemptline
+            - checklist
+            - checklistsection
+            - checklistsectionline
+            - type
+            - system
+            - building
+            - floor
+            - zone
+            - space
+            - review
+            - fieldobservation
+            - meeting
+          example: equipment  
         source_id:
           type: integer
-          format: int32
           example: 167537
+          
     Testattemptstatus:
       type: object
       properties:
         testattemptstatus_id:
           type: integer
-          format: int32
           example: 239
         project_id:
           type: integer
-          format: int32
           example: 67
         name:
           type: string
@@ -1506,16 +1250,15 @@ components:
         color:
           type: string
           example: green
+    
     Equipmenttype:
       type: object
       properties:
         equipmenttype_id:
           type: integer
-          format: int32
           example: 424
         project_id:
           type: integer
-          format: int32
           example: 67
         name:
           type: string
@@ -1525,21 +1268,19 @@ components:
           example: Inline and Roof Mounted Fans
         discipline_id:
           type: integer
-          format: int32
           example: 424
         discipline:
           type: string
           example: Mechanical
+
     Zone:
       type: object
       properties:
         zone_id:
           type: integer
-          format: int32
           example: 539
         project_id:
           type: integer
-          format: int32
           example: 67
         name:
           type: string
@@ -1549,28 +1290,51 @@ components:
           example: Electrical area A2
         building_id:
           type: integer
-          format: int32
           example: 83
         building:
           type: string
           example: Main Building
+    
     testRequest:
-      required:
-      - project_id
       type: object
+      description: This is the request object to get test records
       properties:
         project_id:
           type: integer
-          format: int32
           example: 234
         page:
           type: integer
           description: The page (offset) of records to return. Pages are limited to 500 records.
-          format: int32
           example: 3
           default: 1
         filter:
-          $ref: '#/components/schemas/testRequest_filter'
+          type: object
+          description: This will filter the results
+          properties:
+            id:
+              type: array
+              items:
+                type: integer
+                description: Filter records by test ID's
+              example: [1, 2, 3]
+            search:
+              type: array
+              items:
+                type: string
+                description: Filter records by search string
+              example: [AHU]
+            status:
+              type: array
+              items:
+                type: integer
+                description: Filter records by status ID's
+              example: [1, 2, 3]
+            discipline:
+              type: array
+              items:
+                type: integer
+                description: Filter records by discipline ID's
+              example: [1, 2, 3]
         include:
           type: array
           description: This will include related data in the results
@@ -1581,98 +1345,37 @@ components:
                * `attempts` - Include test attempts in the results
                * `lines` - Include test attempt lines in the results
             example: attempts, lines
-      description: This is the request object to get test records
-    filterResponse:
+      required:
+        - project_id
+        
+    filterResponse: 
       type: object
+      description: This the wrapper that we return records in.  It includes the total records returned, current page and a description of the records. This wrapper is only for requests that can be filtered.
       properties:
         records:
           type: array
           description: Records returned from the query
           items:
             oneOf:
-            - $ref: '#/components/schemas/Test'
+              - $ref: '#/components/schemas/Test'
         total_count:
           type: integer
-          format: int32
           example: 20
         page:
           type: integer
-          format: int32
           example: 1
         description:
           type: string
           description: |
-            *This will return the filter sentence describing the records that were returned*
-      description: This the wrapper that we return records in.  It includes the total records returned, current page and a description of the records. This wrapper is only for requests that can be filtered.
-    testRequest_filter:
-      type: object
-      properties:
-        id:
-          type: array
-          example:
-          - 1
-          - 2
-          - 3
-          items:
-            type: integer
-            description: Filter records by test ID's
-            format: int32
-        search:
-          type: array
-          example:
-          - AHU
-          items:
-            type: string
-            description: Filter records by search string
-        status:
-          type: array
-          example:
-          - 1
-          - 2
-          - 3
-          items:
-            type: integer
-            description: Filter records by status ID's
-            format: int32
-        discipline:
-          type: array
-          example:
-          - 1
-          - 2
-          - 3
-          items:
-            type: integer
-            description: Filter records by discipline ID's
-            format: int32
-      description: This will filter the results
-  parameters:
-    ProjectParam:
-      name: project_id
-      in: query
-      description: The project id
-      required: true
-      style: FORM
-      explode: true
-      schema:
-        type: integer
-        format: int32
-    PageParam:
-      name: page
-      in: query
-      description: The page (offset) of records to return. Pages have a limit of 500 records.
-      required: false
-      style: FORM
-      explode: true
-      schema:
-        type: integer
-        format: int32
-        default: 1
+                        *This will return the filter sentence describing the records that were returned*
+    
+  
   requestBodies:
+    
     testRequest:
-      description: Request body
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/testRequest'
+      description: Request body 
       required: true
-  extensions: {}
