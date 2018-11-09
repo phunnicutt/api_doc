@@ -40,7 +40,7 @@ info:
     
     Then you use the [HMAC Method](https://en.wikipedia.org/wiki/HMAC) to generate the signature for the request. The hashing algorithm to use is **SHA256**.
     
-    In PHP an example of this is code looks like this where `$string` would be the concatenated JSON object and the timestamp.
+    Here is an example of what this would look like in PHP code where `$string` would be the concatenated JSON object and the timestamp.
     
     ```php
     <?php
@@ -56,7 +56,7 @@ info:
        *  Function to make cURL request using CxAlloy authentication
        *
        * @param $url - The URL route to use.
-       * @param string $timestamp - timestamp to use to generate signature.
+       * @param string $timestamp - unix timestamp to use to generate signature.
        * @param string $type - GET, POST, PUT, DELETE. Defaults to GET.
        * @param array $arguments - Endpoint arguments. (optional)
        *
@@ -152,10 +152,16 @@ tags:
     description: Operations dealing with project settings
   - name: Assets
     description: Operations dealing with assets
+  - name: Checklists
+    description: Operations dealing with checklists
   - name: Tests
     description: Operations dealing with tests
+  - name: Issues
+    description: Operations dealing with issues
   - name: Files
     description: Operations dealing with files
+  - name: History
+    description: Operations dealing with history
 paths:
 
   /project:
@@ -703,7 +709,179 @@ paths:
           description: |
                 - Project ID required  
                 - Project does not exist in your account
+  
+  /checklist:
+    post:
+      tags:
+        - Checklists
+      summary: /checklist
+      description: Returns checklist records
+      requestBody:
+        $ref: '#/components/requestBodies/checklistRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/checklistFilterResponse'
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+                - Upgraded projects do not have checklist sections to include
+                - Un-upgraded projects cannot include lines without including sections too.
 
+  /checklistsection:
+    get:
+      tags:
+        - Checklists
+      summary: /checklistsection
+      description: Returns all the sections in a checklist
+      parameters:
+        - $ref: '#/components/parameters/ProjectParam'
+        - in: query
+          name: checklist_id
+          schema:
+            type: integer
+          required: true
+          description: The checklist id 
+        - $ref: '#/components/parameters/PageParam'
+        - in: query
+          name: include
+          schema:
+            type: string
+          required: false
+          description: |
+                This will include related data in the results. (comma seperated string) 
+
+                Possible includes are 
+                  - lines
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checklistsection'
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+                - Checklist ID required
+  
+  /checklistsection/{checklistsection_id}:
+    get:
+      tags:
+        - Checklists
+      summary: /checklistsection/{checklistsection_id}
+      description: Returns a specific checklist section
+      parameters:
+        - in: path
+          name: checklistsection_id
+          description: Specific checklist section ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
+        - in: query
+          name: include
+          schema:
+            type: string
+          required: false
+          description: |
+                This will include related data in the results. (comma seperated string) 
+
+                Possible includes are 
+                  - lines
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checklistsection'
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account  
+                
+  /checklistline:
+      get:
+        tags:
+          - Checklists
+        summary: /checklistline
+        description: Returns all the checklist lines in a checklist
+        parameters:
+          - $ref: '#/components/parameters/ProjectParam'
+          - in: query
+            name: checklist_id
+            schema:
+              type: integer
+            required: true
+            description: The checklist id 
+          - $ref: '#/components/parameters/PageParam'
+          - in: query
+            name: include
+            schema:
+              type: string
+            required: false
+            description: |
+                  This will include related data in the results. (comma seperated string) 
+  
+                  Possible includes are 
+                    - issues
+                    - files
+        responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Checklistline'
+          '400':
+            description: |
+                  - Project ID required  
+                  - Project does not exist in your account
+                  - Checklist ID required
+  
+  /checklistline/{checklistline_id}:
+    get:
+      tags:
+        - Checklists
+      summary: /checklistline/{checklistline_id}
+      description: Returns a specific checklist line
+      parameters:
+        - in: path
+          name: checklistline_id
+          description: Specific checklist line ID
+          schema:
+            type: integer
+          required: true
+        - $ref: '#/components/parameters/ProjectParam'
+        - in: query
+          name: include
+          schema:
+            type: string
+          required: false
+          description: |
+                This will include related data in the results. (comma seperated string) 
+
+                Possible includes are 
+                  - issues
+                  - files
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checklistline'
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account    
+  
   /test:
     post:
       tags:
@@ -718,7 +896,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/filterResponse'
+                $ref: '#/components/schemas/testFilterResponse'
         '400':
           description: |
                 - Project ID required  
@@ -824,6 +1002,7 @@ paths:
                   Possible includes are 
                     - headers (*Lines designated as headers are not included by default*)
                     - issues
+                    - files
         responses:
           '200':
             description: Successful operation
@@ -862,6 +1041,7 @@ paths:
                 Possible includes are 
                   - headers (*Lines designated as headers are not included by default*)
                   - issues
+                  - files
       responses:
         '200':
           description: Successful operation
@@ -872,8 +1052,47 @@ paths:
         '400':
           description: |
                 - Project ID required  
-                - Project does not exist in your account             
-          
+                - Project does not exist in your account  
+                
+  /issue:
+    post:
+      tags:
+        - Issues
+      summary: /issue
+      description: Returns issue records
+      requestBody:
+        $ref: '#/components/requestBodies/issueRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/issueFilterResponse'
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
+                
+  /history:
+    post:
+      tags:
+        - History
+      summary: /history
+      description: Returns history records
+      requestBody:
+        $ref: '#/components/requestBodies/historyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/History'
+        '400':
+          description: |
+                - Project ID required  
+                - Project does not exist in your account
   
   /file:
     get:
@@ -994,6 +1213,9 @@ components:
         timezone:
           type: string
           example: America/New_York
+        is_upgraded:
+          type: boolean
+          example: 1
 
     Equipment:
       type: object
@@ -1049,6 +1271,151 @@ components:
           type: string
           example: Research lab 
 
+    Checklist:
+      type: object
+      properties:
+        checklist_id:
+          type: integer
+          example: 4242
+        project_id:
+          type: integer
+          example: 67
+        number:
+          type: number
+          example: 6
+        name:
+          type: string
+          example: AHU-1
+        status_id:
+          type: integer
+          example: 4
+        status:
+          type: string
+          example: Finished
+        type_id:
+          type: integer
+          example: 2
+        type_name:
+          type: string
+          example: Pre-Functional
+        asset_name:
+          type: string
+          example: AHU-1
+        asset_type:
+          type: string
+          enum:
+              - building
+              - equipment
+              - floor
+              - space
+              - system
+              - type
+              - zone
+          example: Equipment
+        asset_key:
+          type: string
+          example: equipment-1456
+          description: | 
+                        *key is the asset type concatenated with the ID*
+        assigned_name:
+          type: string
+          example: Composite International
+        assigned_type:
+          type: string
+          enum:
+              - person
+              - company
+              - role
+          example: Company
+        assigned_key:
+          type: string
+          example: company-6541
+          description: | 
+                        *key is the assigned type concatenated with the ID*
+        discipline_id:
+          type: integer
+          example: 2
+        discipline:
+          type: string
+          example: Electrical
+        note:
+          type: string
+          example: Functional test could not be performed.
+        tools:
+          type: string
+          example: multimeter, torque wrench, sockets, hand tools.
+          
+    Checklistsection:
+      type: object
+      properties:
+        checklistsection_id:
+          type: integer
+          example: 2346
+        section_number:
+          type: integer
+          example: 3
+        section_name:
+          type: string
+          example: Main Section
+        status_id:
+          type: integer
+          example: 5
+        status:
+          type: string
+          example: Started
+        status_change_person:
+          type: string
+          example: Tony Gutierrez
+        status_change_date:
+          type: string
+          example: "04/12/2013"
+        assigned_name:
+          type: string
+          example: Patrick Hunnicutt
+        assigned_type:
+          type: string
+          enum:
+              - person
+              - company
+              - role
+          example: Person
+        assigned_key:
+          type: string
+          example: person-6541
+          description: | 
+                        *key is the assigned type concatenated with the ID*
+                        
+    Checklistline:
+      type: object
+      properties:
+        checklistline_id:
+          type: integer
+          example: 339
+        line_number:
+          type: integer
+          example: 12
+        description:
+          type: string
+          example: Are all pipes properly labeled?
+        answer:
+          type: string
+          enum:
+            - Yes
+            - No
+            - NA
+        note:
+          type: string
+          example: Yes chilled water passed in phase 2.
+        attribute:
+          type: string
+          example: CHURN PRESSURE
+        attribute_value:
+          type: string
+          example: 23
+        attribute_unit:
+          type: string
+          example: kPa
+    
     Test:
       type: object
       properties:
@@ -1078,6 +1445,14 @@ components:
           example: AHU-1
         asset_type:
           type: string
+          enum:
+              - building
+              - equipment
+              - floor
+              - space
+              - system
+              - type
+              - zone
           example: Equipment
         asset_key:
           type: string
@@ -1089,6 +1464,10 @@ components:
           example: Composite International
         assigned_type:
           type: string
+          enum:
+              - person
+              - company
+              - role
           example: Company
         assigned_key:
           type: string
@@ -1131,7 +1510,7 @@ components:
           example: Tony Gutierrez
         status_change_date:
           type: string
-          example: "2013-04-12"
+          example: "11/04/2013"
           
     Testattemptline:
       type: object
@@ -1163,6 +1542,98 @@ components:
         attribute_unit:
           type: string
           example: kPa
+          
+    Issue:
+      type: object
+      properties:
+        issue_id:
+          type: integer
+          example: 7477
+        name:
+          type: string
+          example: FO-12-2
+        description:
+          type: string
+          example: Re-Install conduit to the walls
+        asset_name:
+          type: string
+          example: AHU-1
+        asset_type:
+          type: string
+          enum:
+              - building
+              - equipment
+              - floor
+              - space
+              - system
+              - type
+              - zone
+          example: Equipment
+        asset_key:
+          type: string
+          example: equipment-1456
+          description: | 
+                        *key is the asset type concatenated with the ID*
+        drawing:
+          type: string
+          example: Vestibule L29
+        priority_id:
+          type: integer
+          example: 5
+        priority:
+          type: string
+          example: Low
+        due_date:
+          type: string
+          example: 12/10/2014
+        assigned_name:
+          type: string
+          example: Patrick Hunnicutt
+        assigned_type:
+          type: string
+          enum:
+              - person
+              - company
+              - role
+          example: Person
+        assigned_key:
+          type: string
+          example: person-6541
+          description: | 
+                        *key is the assigned type concatenated with the ID*
+        disipline_id:
+          type: integer
+          example: 46
+        disipline:
+          type: string
+          example: Controls
+        status_id:
+          type: integer
+          example: 11
+        status:
+          type: string
+          example: Open
+        source_name:
+          type: string
+          example: 1, Attempt 2, Line 6
+        source_type:
+          type: string
+          enum:
+            - test
+            - checklist
+            - review
+            - fieldobservation
+            - meeting
+          example: test  
+        source_id:
+          type: integer
+          example: 167
+        created_by:
+          type: string
+          example: Elysia Hwang
+        date_created:
+          type: string
+          example: 12/10/2014 19:37:14 UTC
           
     Discipline:
       type: object
@@ -1362,6 +1833,116 @@ components:
           type: integer
           example: 167537
           
+    History:
+      type: object
+      properties:
+        history_id:
+          type: integer
+          example: 749
+        project_id:
+          type: integer
+          example: 67
+        type:
+          type: string
+          enum:
+            - INSERT
+            - UPDATE
+            - DELETE
+            - SOFT DELETE
+          example: UPDATE 
+        table:
+          type: string
+          description: Filter records by table
+          enum:
+           - account_person
+           - attribute
+           - building
+           - buildingattribute
+           - checklist
+           - checklistsection
+           - checklistsectionline
+           - checklistsectionstatus
+           - checklistsignatureline
+           - checklisttemplate
+           - checklisttemplatesection
+           - checklisttemplatesectionline
+           - company_project
+           - discipline
+           - equipment
+           - equipmentattribute
+           - equipment_system
+           - fieldobservation
+           - fieldobservationcomment
+           - file
+           - file_tag
+           - floor
+           - floorattribute
+           - folder
+           - issue
+           - issuecomment
+           - issuestatus
+           - meeting
+           - meetingreference
+           - meeting_person
+           - permission
+           - person
+           - person_project
+           - progressreport
+           - project
+           - report
+           - reportsection
+           - review
+           - served
+           - space
+           - spaceattribute
+           - space_zone
+           - system
+           - systemattribute
+           - tag
+           - task
+           - taskcomment
+           - test
+           - testattempt
+           - testattemptline
+           - testattemptstatus
+           - testsignatureline
+           - testtemplate
+           - testtemplateline
+           - type
+           - typeattribute
+           - watch
+           - zone
+           - zoneattribute
+           - checklisttype
+           - equipmentstatus
+           - fieldobservationtype
+           - issuepriority
+           - reviewremark
+           - reviewtype
+           - role
+          example: equipment
+        key:
+          type: integer
+          example: 167537
+        before:
+          type: string
+          description: JSON object 
+          example: {"equipment_id":"1","fk_project":"1","fk_type":"1","fk_discipline":"15","fk_space":"1","fk_equipmentstatus":"4","name":"AHU-1","description":"Air Handling Unit","notes":"","is_closed":"0","d_closed":null,"is_deleted":"0","fk_person__created":"1","fk_person__modified":"10","dt_created":"2012-04-11 18:14:29","dt_modified":"2012-11-06 16:56:47","ts_created":"2012-09-18 02:21:12","ts_modified":"2013-04-27 22:27:05","nat_name":"AHU-[00000000001.000]"} 
+        after:
+          type: string
+          description: JSON object 
+          example: {"equipment_id":"1","fk_project":"1","fk_type":null,"fk_discipline":"15","fk_space":"1","fk_equipmentstatus":"4","name":"AHU-1","description":"Air Handling Unit","notes":"","is_closed":"0","d_closed":null,"is_deleted":"0","fk_person__created":"1","fk_person__modified":"6295","dt_created":"2012-04-11 18:14:29","dt_modified":"2017-02-01 17:31:59","ts_created":"2012-09-18 02:21:12","ts_modified":"2017-02-01 17:31:59","nat_name":"AHU-[00000000001.000]"}
+        changed:
+          type: string
+          description: JSON object 
+          example: {"fk_type":null,"fk_person__modified":"6295","dt_modified":"2017-02-01 17:31:59","ts_modified":"2017-02-01 17:31:59"}
+        person_id:
+          type: integer
+          example: 6295
+        created_date:
+          type: string
+          example: 10/04/2017
+        
     Testattemptstatus:
       type: object
       properties:
@@ -1422,6 +2003,66 @@ components:
           type: string
           example: Main Building
     
+    checklistRequest:
+      type: object
+      description: This is the request object to get checklist records
+      properties:
+        project_id:
+          type: integer
+          example: 234
+        page:
+          type: integer
+          description: The page (offset) of records to return. Pages are limited to 500 records.
+          example: 3
+          default: 1
+        filter:
+          type: object
+          description: This will filter the results
+          properties:
+            id:
+              type: array
+              items:
+                type: integer
+                description: Filter records by checklist ID's
+              example: [1, 2, 3]
+            search:
+              type: array
+              items:
+                type: string
+                description: Filter records by search string
+              example: [AHU]
+            status:
+              type: array
+              items:
+                type: integer
+                description: Filter records by status ID's
+              example: [1, 2, 3]
+            discipline:
+              type: array
+              items:
+                type: integer
+                description: Filter records by discipline ID's
+              example: [1, 2, 3]
+            type:
+              type: array
+              items:
+                type: integer
+                description: Filter records by checklist type ID's
+              example: [1, 2, 3]
+        include:
+          type: array
+          description: This will include related data in the results
+          items:
+            type: string
+            description: |
+              Possible Values Are:
+               * `sections` - Include checklist sections in the results
+               * `lines` - Include checklist lines in the results
+               * `issues` - Include checklist issues in the results
+            example: sections, lines, issues
+      required:
+        - project_id
+    
     testRequest:
       type: object
       description: This is the request object to get test records
@@ -1475,16 +2116,219 @@ components:
       required:
         - project_id
         
-    filterResponse: 
+    issueRequest:
+      type: object
+      description: This is the request object to get issue records
+      properties:
+        project_id:
+          type: integer
+          example: 234
+        page:
+          type: integer
+          description: The page (offset) of records to return. Pages are limited to 500 records.
+          example: 3
+          default: 1
+        filter:
+          type: object
+          description: This will filter the results
+          properties:
+            id:
+              type: array
+              items:
+                type: integer
+                description: Filter records by issue ID's
+              example: [1, 2, 3]
+            discipline:
+              type: array
+              items:
+                type: integer
+                description: Filter records by discipline ID's
+              example: [1, 2, 3]
+            status:
+              type: array
+              items:
+                type: integer
+                description: Filter records by status ID's
+              example: [1, 2, 3]
+            priority:
+              type: array
+              items:
+                type: integer
+                description: Filter records by priority ID's
+              example: [1, 2, 3]
+            source:
+              type: array
+              items:
+                type: string
+                description: Filter records by source
+                enum:
+                 - checklist
+                 - test
+                 - fieldobservation
+                 - review
+                 - meeting
+              example: checklist
+            issue_type:
+              type: array
+              items:
+                type: string
+                description: Filter records by issue type
+                enum:
+                  - design
+                  - construction
+              example: construction
+        include:
+          type: array
+          description: This will include related data in the results
+          items:
+            type: string
+            description: |
+              Possible Values Are:
+               * `comments` - Include issue comments in the results
+               * `files` - Include files attached to issues in the results
+               * `photos` - Include photos attached to issues in the results
+            example: comments, files, photos
+      required:
+        - project_id
+        
+    historyRequest:
+      type: object
+      description: This is the request object to get history records
+      properties:
+        project_id:
+          type: integer
+          example: 234
+        page:
+          type: integer
+          description: The page (offset) of records to return. Pages are limited to 500 records.
+          example: 3
+          default: 1
+        filter:
+          type: object
+          description: This will filter the results
+          properties:
+            id:
+              type: array
+              items:
+                type: integer
+                description: Filter records by history ID's
+              example: [1, 2, 3]
+            record:
+              type: array
+              items:
+                type: string
+                description: |
+                    Filter records by table and id. You can specify a table concatenated with a hyphen and the id of the record in the table. 
+              example: [checklist-163, zone-533, equipment-2345]
+            type:
+              type: array
+              items:
+                type: string
+                description: Filter records by history type
+                enum:
+                  - INSERT
+                  - UPDATE
+                  - DELETE
+              example: construction
+            after_date:
+              type: string
+              description: Only return records created after a certian date. Dates must be in YYYY-MM-DD format.
+              example: [1, 2, 3]
+            before_date:
+              type: string
+              description: Only return records created before a certian date. Dates must be in YYYY-MM-DD format.
+              example: [1, 2, 3]
+            table:
+              type: array
+              items:
+                type: string
+                description: Filter records by table
+                enum:
+                 - account_person
+                 - attribute
+                 - building
+                 - buildingattribute
+                 - checklist
+                 - checklistsection
+                 - checklistsectionline
+                 - checklistsectionstatus
+                 - checklistsignatureline
+                 - checklisttemplate
+                 - checklisttemplatesection
+                 - checklisttemplatesectionline
+                 - company_project
+                 - discipline
+                 - equipment
+                 - equipmentattribute
+                 - equipment_system
+                 - fieldobservation
+                 - fieldobservationcomment
+                 - file
+                 - file_tag
+                 - floor
+                 - floorattribute
+                 - folder
+                 - issue
+                 - issuecomment
+                 - issuestatus
+                 - meeting
+                 - meetingreference
+                 - meeting_person
+                 - permission
+                 - person
+                 - person_project
+                 - progressreport
+                 - project
+                 - report
+                 - reportsection
+                 - review
+                 - served
+                 - space
+                 - spaceattribute
+                 - space_zone
+                 - system
+                 - systemattribute
+                 - tag
+                 - task
+                 - taskcomment
+                 - test
+                 - testattempt
+                 - testattemptline
+                 - testattemptstatus
+                 - testsignatureline
+                 - testtemplate
+                 - testtemplateline
+                 - type
+                 - typeattribute
+                 - watch
+                 - zone
+                 - zoneattribute
+                 - checklisttype
+                 - equipmentstatus
+                 - fieldobservationtype
+                 - issuepriority
+                 - reviewremark
+                 - reviewtype
+                 - role
+              example: checklist
+            person:
+              type: array
+              items:
+                type: integer
+                description: Filter records by person ID's.
+              example: [1, 2, 3]
+      required:
+        - project_id
+        
+    checklistFilterResponse: 
       type: object
       description: This the wrapper that we return records in.  It includes the total records returned, current page and a description of the records. This wrapper is only for requests that can be filtered.
       properties:
         records:
           type: array
-          description: Records returned from the query
+          description: Checklist records returned from the query
           items:
-            oneOf:
-              - $ref: '#/components/schemas/Test'
+            $ref: '#/components/schemas/Checklist'
         total_count:
           type: integer
           example: 20
@@ -1493,9 +2337,51 @@ components:
           example: 1
         description:
           type: string
+          example: 393 Checklists with status started, with type pre-functional, sorted by name.
           description: |
                         *This will return the filter sentence describing the records that were returned*
     
+    testFilterResponse: 
+      type: object
+      description: This the wrapper that we return records in.  It includes the total records returned, current page and a description of the records. This wrapper is only for requests that can be filtered.
+      properties:
+        records:
+          type: array
+          description: Test records returned from the query
+          items:
+            $ref: '#/components/schemas/Test'
+        total_count:
+          type: integer
+          example: 20
+        page:
+          type: integer
+          example: 1
+        description:
+          type: string
+          example: 6 Mechanical Tests with status passed, sorted by name.
+          description: |
+                        *This will return the filter sentence describing the records that were returned*
+    
+    issueFilterResponse: 
+      type: object
+      description: This the wrapper that we return records in.  It includes the total records returned, current page and a description of the records. This wrapper is only for requests that can be filtered.
+      properties:
+        records:
+          type: array
+          description: Issue Records returned from the query
+          items:
+            $ref: '#/components/schemas/Issue'
+        total_count:
+          type: integer
+          example: 20
+        page:
+          type: integer
+          example: 1
+        description:
+          type: string
+          example: 9 Issues of low priority with status open.
+          description: |
+                        *This will return the filter sentence describing the records that were returned*
   
   requestBodies:
     
@@ -1504,5 +2390,29 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/testRequest'
+      description: Request body 
+      required: true
+      
+    checklistRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/checklistRequest'
+      description: Request body 
+      required: true
+      
+    issueRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/issueRequest'
+      description: Request body 
+      required: true
+      
+    historyRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/historyRequest'
       description: Request body 
       required: true
